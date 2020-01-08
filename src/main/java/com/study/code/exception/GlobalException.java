@@ -13,9 +13,8 @@ public class GlobalException {
 
     @ExceptionHandler(Exception.class)
     public String dealException(Exception e, Model model) {
-
+        e.printStackTrace();
         model.addAttribute("msg", e.getMessage());
-
         return "error";
     }
 

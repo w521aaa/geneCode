@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>list</title>
+    <script th:src="@{/js/jquery-3.1.1.min.js}"></script>
+</head>
+
+<style>
+</style>
+
+<body>
+<table border="2">
+    <thead>
+    <tr>
+        <th>序号</th>
+        <th>Key</th>
+        <th>作者</th>
+        <th>数据库表名</th>
+        <th>操作</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="val, stat : ${paramList}">
+        <td th:text="${stat.index + 1}"></td>
+        <td th:text="${val.key}"></td>
+        <td th:text="${val.author}"></td>
+        <td th:text="${val.dataTableName}"></td>
+        <td><a th:href="@{'/gene/code/download/' + ${val.key} + '?dir=false'}">快捷下载</a></td>
+        <td>
+            <input type="checkbox" name="containDir" th:id="dir_ + ${val.key}" value="true" checked/>
+            <button th:onclick="downloadFile([[${val.key}]])">包含目录下载</button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+
+<script th:inline="javascript">
+    function downloadFile(key) {
+        var dir = $("#dir_" + key).prop('checked') ? true : false;
+        window.open("/gene/code/download/" + key + "?dir=" + dir);
+    }
+</script>
+</html>

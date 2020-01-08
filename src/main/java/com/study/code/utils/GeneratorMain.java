@@ -1,11 +1,13 @@
-package com.study.code;
+package com.study.code.utils;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.generator.AutoGenerator;
 import com.baomidou.mybatisplus.generator.InjectionConfig;
 import com.baomidou.mybatisplus.generator.config.*;
 import com.baomidou.mybatisplus.generator.config.builder.ConfigBuilder;
+import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
+import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.FileType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
@@ -35,10 +37,10 @@ public class GeneratorMain {
         //serviceImplName  service impl 命名方式  默认值：null 例如：%sBusinessImpl 生成 UserBusinessImpl
         //controllerName   controller 命名方式    默认值：null 例如：%sAction 生成 UserAction
         GlobalConfig gc = new GlobalConfig();
-        String projectPath = System.getProperty("user.dir");
-        gc.setOutputDir(projectPath + "/src/main/java");
-        gc.setAuthor("");
+        gc.setAuthor("test");
+        gc.setFileOverride(true);
         gc.setOpen(false);
+        gc.setDateType(DateType.ONLY_DATE);
         mpg.setGlobalConfig(gc);
 
         // 数据源配置
@@ -57,7 +59,7 @@ public class GeneratorMain {
 
         PackageConfig pc = new PackageConfig();
         pc.setModuleName("generator");
-        pc.setParent("com.example");
+        pc.setParent("com.study.code");
         mpg.setPackageInfo(pc);
 
         // 自定义配置
@@ -82,7 +84,7 @@ public class GeneratorMain {
             @Override
             public String outputFile(TableInfo tableInfo) {
                 // 自定义输出文件名 ， 如果你 Entity 设置了前后缀、此处注意 xml 的名称会跟着发生变化！！
-                return projectPath + "/src/main/resources/mapper/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
+                return "mapper/" + tableInfo.getEntityName() + "Mapper" + StringPool.DOT_XML;
             }
         });
 
@@ -137,14 +139,25 @@ public class GeneratorMain {
         //logicDeleteFieldName  逻辑删除属性名称
 
         StrategyConfig strategy = new StrategyConfig();
-        strategy.setNaming(NamingStrategy.no_change);
-        strategy.setColumnNaming(NamingStrategy.no_change);
-        strategy.setSuperEntityClass("");
+        strategy.setNameConvert(new INameConvert() {
+
+            @Override
+            public String entityNameConvert(TableInfo tableInfo) {
+                String tableName = NamingStrategy.removePrefix(tableInfo.getName(), "t_".split(","));
+                tableName = tableName.substring(0, 1).toUpperCase() + tableName.substring(1);
+                return NamingStrategy.capitalFirst(NamingStrategy.underlineToCamel(tableName));
+            }
+
+            @Override
+            public String propertyNameConvert(TableField field) {
+                return NamingStrategy.capitalFirst(NamingStrategy.removePrefixAndCamel(field.getName(), "f".split(",")));
+            }
+        });
+        strategy.setInclude("t_user".split(","));
         strategy.setEntityLombokModel(true);
         strategy.setRestControllerStyle(true);
-        strategy.setInclude("t_user".split(","));
         strategy.setControllerMappingHyphenStyle(true);
-//        strategy.setTablePrefix(pc.getModuleName() + "_");
+        strategy.setEntityTableFieldAnnotationEnable(true);
         mpg.setStrategy(strategy);
 
 
