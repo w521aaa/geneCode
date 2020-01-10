@@ -16,8 +16,6 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 @Controller
 @RequestMapping("/gene")
@@ -60,7 +58,7 @@ public class GeneController {
         String content = paramsVo.getKey() + "&" + paramsVo.getAuthor() + "&" + paramsVo.getDataTableName();
         CommonUtils.writeToFileReader(content, CommonUtils.rootPath, CommonUtils.recordFileName);
 
-        response.sendRedirect("/gene/code/download/" + paramsVo.getKey());
+        response.sendRedirect("/gene/list");
     }
 
     @GetMapping("/code/download/{key}")
