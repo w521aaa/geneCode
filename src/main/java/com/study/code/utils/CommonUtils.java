@@ -43,6 +43,11 @@ public class CommonUtils {
             }
             if(atemp.isDirectory()){
                 fileList(atemp, retFileList);
+
+                //如果是空目录 加入进来
+                if(atemp.listFiles().length == 0) {
+                    retFileList.add(atemp);
+                }
             }
         }
     }
@@ -130,6 +135,13 @@ public class CommonUtils {
         byte[] buf = new byte[1024];
         int len;
         for (File srcFile : retFileList) {
+            //空目录加入进来
+            if(containDir && srcFile.isDirectory()) {
+                zos.putNextEntry(new ZipEntry(getRelativePath(path, srcFile)));
+                zos.closeEntry();
+                continue;
+            }
+
             if(containDir) {
                 zos.putNextEntry(new ZipEntry(getRelativePath(path, srcFile)));
             } else {
