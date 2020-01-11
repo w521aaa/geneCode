@@ -8,10 +8,17 @@ import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 import com.study.code.enums.DatabaseTypeEnum;
 import com.study.code.paramVo.GeneParamsVo;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 
 import java.io.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -20,6 +27,12 @@ public class CommonUtils {
     public static String rootPath = "D:\\geneCode";
 
     public static String recordFileName = "geneRecord.txt";
+
+    //当前时间格式化
+    public static String getFormatNowDate() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new Date());
+    }
 
     //递归查找所有目录下的文件
     public static void fileList(File file, List<File> retFileList){
@@ -142,10 +155,7 @@ public class CommonUtils {
     }
 
     //生成代码
-    public static void geneCode(GeneParamsVo paramsVo) {
-        //输出路径
-        String outDir = CommonUtils.rootPath + File.separator + paramsVo.getKey();
-
+    public static void geneCode(String outDir, GeneParamsVo paramsVo) {
         //如果目录不存在 则创建
         File file = new File(outDir);
         if(!file.exists()) {
@@ -192,13 +202,13 @@ public class CommonUtils {
         // 配置模板
         TemplateConfig templateConfig = new TemplateConfig();
         // 配置自定义输出模板
-        //指定自定义模板路径，注意不要带上.ftl/.vm, 会根据使用的模板引擎自动识别
-        templateConfig.setEntity("templates/vm/entity.java.my");
-        templateConfig.setController("templates/vm/controller.java.my");
-        templateConfig.setService("templates/vm/service.java.my");
-        templateConfig.setServiceImpl("templates/vm/serviceImpl.java.my");
-        templateConfig.setMapper("templates/vm/mapper.java.my");
-        templateConfig.setXml("/templates/vm/mapper.xml.my");
+        //指定自定义模板路径，注意不要带上.ftl/.backEndDataVM, 会根据使用的模板引擎自动识别
+        templateConfig.setEntity("templates/backEndDataVM/entity.java.my");
+        templateConfig.setController("templates/backEndDataVM/controller.java.my");
+        templateConfig.setService("templates/backEndDataVM/service.java.my");
+        templateConfig.setServiceImpl("templates/backEndDataVM/serviceImpl.java.my");
+        templateConfig.setMapper("templates/backEndDataVM/mapper.java.my");
+        templateConfig.setXml("/templates/backEndDataVM/mapper.xml.my");
         mpg.setTemplate(templateConfig);
 
         StrategyConfig strategy = new StrategyConfig();
@@ -231,4 +241,58 @@ public class CommonUtils {
         mpg.execute();
     }
 
+    //生成项目
+    public static void geneProjectCode(GeneParamsVo paramsVo) {
+        //输出路径
+        String rootOutDir = CommonUtils.rootPath + File.separator + paramsVo.getKey();
+
+        String javaOutDir = rootOutDir + File.separator + "src/main/java";
+        String tempPath = paramsVo.getPackageParent().replace(".", "/");
+        //如果目录不存在 则创建
+        File javaFile = new File(javaOutDir + File.separator + tempPath);
+        if(!javaFile.exists()) {
+            javaFile.mkdirs();
+        }
+
+        String resOutDir = rootOutDir + File.separator + "src/main/resources";
+        //如果目录不存在 则创建
+        File resFile = new File(resOutDir);
+        if(!resFile.exists()) {
+            resFile.mkdirs();
+        }
+
+        VelocityEngine velocityEngine = new VelocityEngine();
+        Properties properties = new Properties();
+        String projectPath = System.getProperty("user.dir");
+        String basePath = projectPath + File.separator + "src/main/resources/templates/backEndProjectVM/";//这里需要这样写路径！！！
+        // 设置模板的路径
+        properties.setProperty(Velocity.FILE_RESOURCE_LOADER_PATH, basePath);
+        velocityEngine.init(properties);
+
+        //生成pom文件
+        Template template = velocityEngine.getTemplate("pom.xml.my.vm");
+        VelocityContext pomContext = new VelocityContext();
+        pomContext.put( "gene", paramsVo);
+        StringWriter pomSw = new StringWriter();
+        template.merge(pomContext, pomSw);
+        writeToFileReader(pomSw.toString(), rootOutDir, "pom.xml");
+
+        //生成启动文件
+        template = velocityEngine.getTemplate("application.java.my.vm");
+        VelocityContext startContext = new VelocityContext();
+        startContext.put( "gene", paramsVo);
+        startContext.put("date", getFormatNowDate());
+        StringWriter startSw = new StringWriter();
+        template.merge(startContext, startSw);
+        String tempFileName = NamingStrategy.capitalFirst(paramsVo.getPackageModuleName()) + "Application.java";
+        writeToFileReader(startSw.toString(), javaFile.getPath(), tempFileName);
+
+        //生成配置文件
+        template = velocityEngine.getTemplate("application.yml.my.vm");
+        VelocityContext appContext = new VelocityContext();
+        appContext.put( "gene", paramsVo);
+        StringWriter appSw = new StringWriter();
+        template.merge(appContext, appSw);
+        writeToFileReader(appSw.toString(), resFile.getPath(), "application.yml");
+    }
 }

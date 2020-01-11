@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>geneCode</title>
+    <script th:src="@{/js/jquery-3.1.1.min.js}"></script>
+</head>
+
+<style>
+    body {
+        text-align: center;
+        padding-top: 100px;
+    }
+    .content {
+        margin-top: 10px;
+    }
+</style>
+
+<body>
+<form method="get" action="/gene/project/code">
+    <div class="content">
+        <span>作者：</span>
+        <input name="author"/>
+    </div>
+    <div class="content">
+        <span>项目名：</span>
+        <input name="packageModuleName" placeholder="demo"/>
+    </div>
+    <div class="content">
+        <span>父级包名：</span>
+        <input name="packageParent" placeholder="com.example.demo"/>
+    </div>
+    <div class="content">
+        <span>端口：</span>
+        <input name="serverPort" placeholder="8080"/>
+    </div>
+
+    <div class="content">
+        <button type="button" id="database_button_show">显示数据库配置</button>
+        <button type="button" id="database_button_hide" style="display: none">隐藏数据库配置</button>
+        <button type="button" id="table_button_show">显示表的配置</button>
+        <button type="button" id="table_button_hide" style="display: none">隐藏表的配置</button>
+    </div>
+
+    <div id="database_div" style="display: none">
+        <div class="content">
+            <span>数据库类型：</span>
+            mysql: <input type="checkbox" name="databaseType" id="databaseTypeMysql" value="mysql"/>
+            postgreSql: <input type="checkbox" name="databaseType" id="databaseTypePost" value="postgrelSql"/>
+        </div>
+        <div class="content">
+            <span>数据库名字：</span>
+            <input name="dataName"/>
+        </div>
+        <div class="content">
+            <span>数据库用户名：</span>
+            <input name="dataUsername"/>
+        </div>
+        <div class="content">
+            <span>数据库密码：</span>
+            <input type="password" name="dataPassword"/>
+        </div>
+        <div class="content">
+            <span>数据库IP和端口：</span>
+            <input name="dataIPPort" id="dataIPPort"/>
+        </div>
+    </div>
+    <div id="table_div" style="display: none">
+        <div class="content">
+            <span>数据库表名字用英文","隔开：</span>
+            <input name="dataTableName" placeholder="t_user,t_group"/></div>
+        <div class="content">
+            <span>表名需要移除字部分：</span>
+            <input name="dataTableRemovePrefix" placeholder="t_"/>
+        </div>
+        <div class="content">
+            <span>表中字段需要移除部分：</span>
+            <input name="tableFieldRemovePrefix" placeholder="f"/>
+        </div>
+        <div class="content">
+            <span>逻辑删除字段：</span>
+            <input name="logicDelete" placeholder="fdelete"/>
+        </div>
+        <div class="content">
+            <span>lombok：</span>
+            <input type="checkbox" name="lombokModel" value="true"/>
+        </div>
+    </div>
+    <div class="content">
+        <input type="submit" value="提交"/>
+    </div>
+</form>
+</body>
+
+<script th:inline="javascript">
+    $(function() {
+        $("#databaseTypeMysql").click(function () {
+            if ($("#databaseTypeMysql").prop('checked')) {
+                $("#dataIPPort").val("localhost:3306");
+            }
+        });
+
+        $("#databaseTypePost").click(function () {
+            if ($("#databaseTypePost").prop('checked')) {
+                $("#dataIPPort").val("localhost:5432");
+            }
+        });
+
+        $("#database_button_show").click(function () {
+            $("#database_button_show").hide();
+            $("#database_button_hide").show();
+            $("#database_div").show();
+        });
+
+        $("#database_button_hide").click(function () {
+            $("#database_button_hide").hide();
+            $("#database_button_show").show();
+            $("#database_div").hide();
+        });
+
+        $("#table_button_show").click(function () {
+            $("#database_button_show").hide();
+            $("#database_button_hide").show();
+            $("#table_button_show").hide();
+            $("#table_button_hide").show();
+            $("#database_div").show();
+            $("#table_div").show();
+        });
+
+        $("#table_button_hide").click(function () {
+            $("#database_button_hide").hide();
+            $("#database_button_show").show();
+            $("#table_button_hide").hide();
+            $("#table_button_show").show();
+            $("#database_div").hide();
+            $("#table_div").hide();
+        });
+    })
+</script>
+</html>

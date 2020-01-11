@@ -43,4 +43,10 @@ public class GeneParamsVo {
 
     //lombok
     private Boolean lombokModel = false;
+
+    //项目描述
+    private String desc;
+
+    //项目端口
+    private String serverPort;
 }

@@ -1,0 +1,19 @@
+package ${gene.packageParent};
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+#set($name = "${gene.packageModuleName.substring(0,1).toUpperCase()}${gene.packageModuleName.substring(1)}")
+
+/**
+*
+* @author ${gene.author}
+* @since ${date}
+*/
+@SpringBootApplication
+public class ${name}Application {
+
+    public static void main(String[] args) {
+        SpringApplication.run(${name}Application.class, args);
+    }
+
+}

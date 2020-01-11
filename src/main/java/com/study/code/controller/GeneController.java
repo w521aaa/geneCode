@@ -5,7 +5,7 @@ import com.study.code.utils.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -23,42 +21,44 @@ public class GeneController {
 
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping("")
-    public String geneCode() {
-        return "geneCode";
-    }
-
-    @GetMapping("/list")
-    public String list(@RequestParam(defaultValue = "") String key, Model model) {
-        String content = CommonUtils.readFromFile(CommonUtils.rootPath, CommonUtils.recordFileName);
-        content = content.replace("\r\n", "&");
-        List<GeneParamsVo> paramsVoList = new ArrayList<>(10);
-        String[] split = content.split("&");
-        for(int i=split.length-1; i>0; i-=3) {
-            GeneParamsVo vo = new GeneParamsVo();
-            vo.setKey(split[i-2]);
-            vo.setAuthor(split[i-1]);
-            vo.setDataTableName(split[i]);
-            paramsVoList.add(vo);
-        }
-
-        model.addAttribute("paramList", paramsVoList);
-        return "list";
-    }
-
     @GetMapping("/code")
     public void geneCode(GeneParamsVo paramsVo, HttpServletResponse response) throws Exception {
         paramsVo.setKey(UUID.randomUUID().toString().replace("-", ""));
         //生成代码
         logger.info(paramsVo.toString());
 
-        CommonUtils.geneCode(paramsVo);
+        //输出路径
+        String outDir = CommonUtils.rootPath + File.separator + paramsVo.getKey();
+        CommonUtils.geneCode(outDir, paramsVo);
 
         //记录文件
         String content = paramsVo.getKey() + "&" + paramsVo.getAuthor() + "&" + paramsVo.getDataTableName();
         CommonUtils.writeToFileReader(content, CommonUtils.rootPath, CommonUtils.recordFileName);
 
-        response.sendRedirect("/gene/list");
+        response.sendRedirect("/gene/goto/list");
+    }
+
+    @GetMapping("/project/code")
+    public void geneProjectCode(GeneParamsVo paramsVo, HttpServletResponse response) throws Exception {
+        paramsVo.setKey(UUID.randomUUID().toString().replace("-", ""));
+        //生成代码
+        logger.info(paramsVo.toString());
+
+        //生成项目
+        CommonUtils.geneProjectCode(paramsVo);
+
+        if(!StringUtils.isEmpty(paramsVo.getDataTableName())) {
+            //生成代码
+            //输出路径
+            String outDir = CommonUtils.rootPath + File.separator + paramsVo.getKey() + "/src/main/java";
+            CommonUtils.geneCode(outDir, paramsVo);
+        }
+
+        //记录文件
+        String content = paramsVo.getKey() + "&" + paramsVo.getAuthor() + "&" + paramsVo.getPackageModuleName();
+        CommonUtils.writeToFileReader(content, CommonUtils.rootPath, CommonUtils.recordFileName);
+
+        response.sendRedirect("/gene/goto/list");
     }
 
     @GetMapping("/code/download/{key}")

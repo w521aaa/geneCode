@@ -1,0 +1,17 @@
+#if(${gene.serverPort})
+server:
+  port: ${gene.serverPort}
+#end
+
+#if(${gene.dataIPPort})
+  #set($className = "com.mysql.cj.jdbc.Driver")
+  #if(${gene.databaseType} == "postgrelSql")
+    #set($className = "org.postgresql.Driver")
+  #end
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${gene.dataIPPort}/${gene.dataName}?useSSL=true&serverTimezone=UTC
+    username: ${gene.dataUsername}
+    password: ${gene.dataPassword}
+#end
